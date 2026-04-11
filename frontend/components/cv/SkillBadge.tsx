@@ -7,9 +7,9 @@ interface SkillBadgeProps {
 
 export function SkillBadge({ skill, variant = "default" }: SkillBadgeProps) {
   const styles = {
-    default: "bg-[#292C37] text-[#F0F0F0] border-[#3a3d4a]",
-    matched: "bg-[#B11623]/20 text-[#F0F0F0] border-[#B11623]/40",
-    missing: "bg-[#292C37] text-[#CCCCCC] border-[#3a3d4a] opacity-60",
+    default: "bg-[#1E2433] text-[#F1F5F9] border-[#2a3044]",
+    matched: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    missing: "bg-[#1E2433] text-[#94A3B8] border-[#2a3044] opacity-60",
   };
 
   return (

@@ -1,32 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { CVUploader } from "@/components/cv/CVUploader";
 import { ReportSection } from "@/components/cv/ReportSection";
 import { Textarea } from "@/components/ui/textarea";
 import { analyzeCV, AnalyzeResponse } from "@/lib/api";
-import { ArrowRight, Loader2, Sparkles, Target, BarChart2, Lightbulb, FileText } from "lucide-react";
-
-const features = [
-  { icon: FileText, label: "Extrae skills" },
-  { icon: Target, label: "Detecta seniority" },
-  { icon: BarChart2, label: "Calcula match" },
-  { icon: Lightbulb, label: "Da recomendaciones" },
-];
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export default function Home() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile]                     = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<AnalyzeResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading]               = useState(false);
+  const [report, setReport]                 = useState<AnalyzeResponse | null>(null);
+  const [error, setError]                   = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!file) return;
     setLoading(true);
     setError(null);
     setReport(null);
-
     try {
       const result = await analyzeCV(file, jobDescription);
       setReport(result);
@@ -38,88 +31,138 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111114]">
+    <div className="min-h-screen bg-[#080808] text-[#F1F5F9] overflow-x-hidden">
+
+      {/* Fondo — arco luminoso en forma de U */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+
+        {/* Elipse grande con borde luminoso — esto crea el arco en U */}
+        <div
+          className="blob-red"
+          style={{
+            position: "absolute",
+            bottom: "-70%",
+            left: "50%",
+            marginLeft: "-80vw",
+            width: "160vw",
+            height: "150vh",
+            borderRadius: "50%",
+            border: "2px solid rgba(232,25,44,0.5)",
+            boxShadow:
+              "0 0 120px 20px rgba(232,25,44,0.35), inset 0 0 120px 20px rgba(232,25,44,0.25)",
+            filter: "blur(30px)",
+          }}
+        />
+
+        {/* Segunda capa interior más intensa */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-65%",
+            left: "50%",
+            marginLeft: "-70vw",
+            width: "140vw",
+            height: "130vh",
+            borderRadius: "50%",
+            border: "1px solid rgba(232,25,44,0.4)",
+            boxShadow:
+              "0 0 80px 10px rgba(232,25,44,0.25), inset 0 0 60px 10px rgba(232,25,44,0.15)",
+            filter: "blur(20px)",
+          }}
+        />
+
+        {/* Partículas */}
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          {[
+            [120,80],[300,150],[500,60],[750,120],[950,90],[1150,180],[1300,70],
+            [200,300],[420,250],[680,320],[880,280],[1100,350],[1350,300],
+            [80,500],[350,480],[600,520],[820,490],[1050,510],[1280,470],
+            [180,680],[440,650],[700,700],[930,660],[1200,690],
+          ].map(([cx, cy], i) => (
+            <circle key={i} cx={cx} cy={cy} r="1.5" fill="rgba(255,255,255,0.2)" />
+          ))}
+          {[
+            [60,200],[260,400],[480,160],[820,380],[1020,200],[1180,420],[1380,160],
+            [140,560],[380,600],[640,440],[900,580],[1140,440],[50,760],[320,740],
+          ].map(([cx, cy], i) => (
+            <circle key={`s${i}`} cx={cx} cy={cy} r="0.8" fill="rgba(255,255,255,0.12)" />
+          ))}
+        </svg>
+      </div>
 
       {/* Nav */}
-      <nav className="border-b border-[#292C37] px-6 py-4">
+      <nav className="relative z-10 border-b border-white/5 px-8 py-4 bg-[#080808]/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#B11623] flex items-center justify-center">
-              <FileText className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-[#F0F0F0] font-semibold text-lg tracking-tight">Talently</span>
-          </div>
-          <span className="text-[#CCCCCC] text-xs border border-[#292C37] rounded-full px-3 py-1">
+          <Image
+            src="/logo.png"
+            alt="Talently"
+            width={120}
+            height={34}
+            className="object-contain"
+          />
+          <span className="text-[#444] text-xs border border-white/8 rounded-full px-3 py-1 tracking-widest uppercase">
             Beta
           </span>
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-6 py-16 flex flex-col gap-16">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 flex flex-col">
 
         {/* Hero */}
-        <section className="flex flex-col items-center text-center gap-6">
-          <span className="flex items-center gap-1.5 text-xs font-medium text-[#B11623] border border-[#B11623]/30 bg-[#B11623]/10 rounded-full px-4 py-1.5 tracking-wider uppercase">
-            <Sparkles className="w-3 h-3" />
-            Análisis de CVs con IA
-          </span>
-
-          <h1 className="text-5xl font-bold text-[#F0F0F0] leading-tight max-w-2xl tracking-tight">
-            Descubrí exactamente{" "}
-            <span className="text-[#B11623]">qué mejorar</span>{" "}
-            en tu CV
-          </h1>
-
-          <p className="text-[#CCCCCC] text-lg max-w-xl leading-relaxed">
-            Subí tu CV en PDF, pegá la descripción de la vacante que te interesa
-            y recibí un análisis detallado con recomendaciones concretas.
+        <section className="flex flex-col items-center text-center pt-28 pb-20 gap-10">
+          <p className="text-[#444] text-xs tracking-[0.4em] uppercase font-mono">
+            Análisis de CVs con IA.
           </p>
 
-          {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2 mt-2">
-            {features.map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-2 bg-[#292C37] border border-[#3a3d4a] rounded-full px-4 py-2 text-sm text-[#CCCCCC]"
-              >
-                <Icon className="w-3.5 h-3.5 text-[#B11623]" />
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
+          <h1 className="font-sans leading-[1.08] tracking-[-0.01em] text-white"
+            style={{ fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 300, fontFamily: "var(--font-inter)" }}
+          >
+            Mejorá tu CV. Conseguí el trabajo.
+          </h1>
+
+          <p className="text-[#444] text-base max-w-sm leading-relaxed font-light">
+            Subí tu CV, pegá la descripción de la vacante y recibí
+            recomendaciones concretas para destacar.
+          </p>
         </section>
 
         {/* Formulario */}
-        <section className="flex flex-col gap-6">
+        <section className="flex flex-col gap-6 pb-20">
+
+          {/* Divisor */}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-px flex-1 bg-white/6" />
+            <span className="text-[#444] text-xs tracking-widest uppercase">Comenzar</span>
+            <div className="h-px flex-1 bg-white/6" />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ minHeight: "260px" }}>
             <CVUploader onFileSelect={setFile} selectedFile={file} />
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <label className="text-[#F0F0F0] text-sm font-medium">
+                <label className="text-[#888] text-xs tracking-widest uppercase">
                   Descripción de la vacante
                 </label>
-                <span className="text-[#CCCCCC]/60 text-xs border border-[#3a3d4a] rounded-full px-2 py-0.5">
-                  opcional
-                </span>
+                <span className="text-[#444] text-xs tracking-widest uppercase">opcional</span>
               </div>
               <Textarea
-                placeholder="Pegá acá la descripción del trabajo al que querés aplicar. Si la incluís, calculamos el porcentaje de match y los skills que te faltan."
+                placeholder="Pegá acá la descripción del trabajo. Si la incluís, calculamos el match y los skills que te faltan."
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                className="flex-1 h-full min-h-[220px] bg-[#1a1d27] border-[#3a3d4a] text-[#F0F0F0] placeholder:text-[#CCCCCC]/40 resize-none focus-visible:ring-[#B11623] focus-visible:ring-1 focus-visible:border-[#B11623] rounded-2xl text-sm leading-relaxed"
+                className="flex-1 h-full min-h-[220px] bg-[#111111] border-white/8 text-[#F1F5F9] placeholder:text-[#333] resize-none focus-visible:ring-1 focus-visible:ring-[#E8192C]/50 focus-visible:border-[#E8192C]/30 rounded-xl text-sm leading-relaxed transition-colors"
               />
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3 pt-2">
             <button
               onClick={handleAnalyze}
               disabled={!file || loading}
-              className="group flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-[#F0F0F0] text-sm
-                bg-[#B11623] hover:bg-[#9F111B] transition-all duration-200
-                disabled:opacity-40 disabled:cursor-not-allowed
-                shadow-lg shadow-[#B11623]/20 hover:shadow-[#B11623]/30"
+              className="group flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-semibold text-white text-sm
+                bg-[#E8192C] hover:bg-[#C41425] transition-all duration-200
+                disabled:opacity-30 disabled:cursor-not-allowed
+                shadow-[0_0_40px_rgba(232,25,44,0.3)]"
             >
               {loading ? (
                 <>
@@ -135,11 +178,10 @@ export default function Home() {
             </button>
 
             {!file && (
-              <p className="text-[#CCCCCC]/50 text-xs">Primero subí tu CV para continuar</p>
+              <p className="text-[#444] text-xs tracking-wide">Primero subí tu CV para continuar</p>
             )}
-
             {error && (
-              <p className="text-[#B11623] text-sm">{error}</p>
+              <p className="text-[#E8192C] text-sm">{error}</p>
             )}
           </div>
         </section>
@@ -148,9 +190,9 @@ export default function Home() {
 
       </main>
 
-      <footer className="border-t border-[#292C37] mt-16 py-8 px-6">
-        <div className="max-w-5xl mx-auto text-center text-[#CCCCCC]/40 text-xs">
-          Talently · Analizador de CVs con IA
+      <footer className="relative z-10 border-t border-white/5 py-8 px-6">
+        <div className="max-w-4xl mx-auto text-center text-[#333] text-xs tracking-widest uppercase">
+          Talently · Análisis de CVs con IA
         </div>
       </footer>
 

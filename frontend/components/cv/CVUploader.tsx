@@ -32,13 +32,13 @@ export function CVUploader({ onFileSelect, selectedFile }: CVUploaderProps) {
       onDrop={handleDrop}
       className={`
         relative flex flex-col items-center justify-center gap-4
-        w-full h-full min-h-[220px] rounded-2xl border-2 border-dashed cursor-pointer
+        w-full h-full min-h-[220px] rounded-xl border cursor-pointer
         transition-all duration-200
         ${isDragging
-          ? "border-[#B11623] bg-[#B11623]/10 scale-[1.01]"
+          ? "border-[#E8192C]/50 bg-[#E8192C]/5"
           : selectedFile
-            ? "border-[#B11623]/60 bg-[#B11623]/5"
-            : "border-[#3a3d4a] bg-[#1a1d27] hover:border-[#B11623]/50 hover:bg-[#B11623]/5"
+            ? "border-[#E8192C]/30 bg-[#111111]"
+            : "border-white/8 bg-[#111111] hover:border-white/15"
         }
       `}
     >
@@ -52,26 +52,26 @@ export function CVUploader({ onFileSelect, selectedFile }: CVUploaderProps) {
 
       {selectedFile ? (
         <>
-          <div className="w-12 h-12 rounded-xl bg-[#B11623]/20 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-[#B11623]" />
+          <div className="w-10 h-10 rounded-lg bg-[#E8192C]/10 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-[#E8192C]" />
           </div>
           <div className="text-center">
-            <p className="text-[#F0F0F0] font-medium text-sm">{selectedFile.name}</p>
-            <p className="text-[#CCCCCC] text-xs mt-1">
+            <p className="text-[#F1F5F9] text-sm font-medium">{selectedFile.name}</p>
+            <p className="text-[#444] text-xs mt-1">
               {(selectedFile.size / 1024 / 1024).toFixed(2)} MB · clic para cambiar
             </p>
           </div>
         </>
       ) : (
         <>
-          <div className="w-12 h-12 rounded-xl bg-[#292C37] flex items-center justify-center">
-            <Upload className="w-5 h-5 text-[#CCCCCC]" />
+          <div className="w-10 h-10 rounded-lg bg-white/4 flex items-center justify-center">
+            <Upload className="w-4 h-4 text-[#555]" />
           </div>
           <div className="text-center">
-            <p className="text-[#F0F0F0] font-medium text-sm">Arrastrá tu CV aquí</p>
-            <p className="text-[#CCCCCC] text-xs mt-1">o hacé clic para seleccionarlo</p>
+            <p className="text-[#888] text-sm">Arrastrá tu CV aquí</p>
+            <p className="text-[#444] text-xs mt-1">o hacé clic para seleccionarlo</p>
           </div>
-          <span className="text-[#CCCCCC]/50 text-xs border border-[#3a3d4a] rounded-full px-3 py-1">
+          <span className="text-[#333] text-xs border border-white/6 rounded-full px-3 py-1 tracking-widest uppercase">
             PDF · máx. 5MB
           </span>
         </>
