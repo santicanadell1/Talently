@@ -32,12 +32,15 @@ class AnalyzeCVUseCase:
         # Paso 2: extraer entidades con NER
         entities = self.ner_service.extract_entities(raw_text)
 
-        # Paso 3: clasificar seniority y área. El seniority recibe los años
-        # detectados por el NER: si están, se aplica una regla determinística;
-        # si no, el classifier cae al modelo zero-shot.
+        # Paso 3: clasificar seniority y área.
+        # Usamos un texto compacto (título + skills) para el área: el texto
+        # completo del CV tiene bullets de trabajo que distraen al modelo
+        # zero-shot y producen clasificaciones incorrectas (ej. "QA / Testing"
+        # para alguien que menciona "QA sheets" en un bullet de experiencia).
         experience_years = entities.get("experience_years")
-        seniority = self.classifier.classify_seniority(raw_text, experience_years)
-        area = self.classifier.classify_area(raw_text)
+        classification_text = self._build_classification_text(raw_text, entities)
+        seniority = self.classifier.classify_seniority(classification_text, experience_years)
+        area = self.classifier.classify_area(classification_text)
 
         # Paso 4: armar el perfil
         profile = ExtractedProfile(
@@ -62,3 +65,20 @@ class AnalyzeCVUseCase:
         # Paso 6: generar reporte con recomendaciones
         report = AnalysisReport(profile=profile, job_match=job_match, recommendations=[])
         return self.report_generator.generate(report)
+
+    @staticmethod
+    def _build_classification_text(raw_text: str, entities: dict) -> str:
+        """
+        Arma un texto compacto con la información más relevante para clasificar
+        área y seniority. Solo incluye las primeras dos líneas no vacías del CV
+        (nombre + título declarado) más las skills detectadas.
+
+        Limitamos a 2 líneas porque a partir de la tercera el CV suele tener
+        datos de contacto (teléfono, email, LinkedIn) que no aportan semántica
+        para la clasificación y pueden confundir al modelo.
+        """
+        non_empty = [l.strip() for l in raw_text.splitlines() if l.strip()]
+        title_lines = "\n".join(non_empty[:2])
+        skills = entities.get("skills", [])
+        skills_str = ", ".join(skills) if skills else ""
+        return f"{title_lines}\nSkills: {skills_str}".strip()

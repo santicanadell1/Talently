@@ -19,6 +19,7 @@ AREA_LABELS = [
     "Backend Development",
     "Frontend Development",
     "Full Stack Development",
+    "Web Development",
     "Data Science",
     "Machine Learning Engineering",
     "DevOps",
