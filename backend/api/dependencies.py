@@ -7,10 +7,11 @@ from services.report_generator import ReportGeneratorService
 
 
 def get_analyze_use_case() -> AnalyzeCVUseCase:
+    classifier = ClassifierService()
     return AnalyzeCVUseCase(
         pdf_extractor=PDFExtractorService(),
         ner_service=NERService(),
-        classifier=ClassifierService(),
-        matcher=MatcherService(),
+        classifier=classifier,
+        matcher=MatcherService(classifier=classifier),
         report_generator=ReportGeneratorService(),
     )

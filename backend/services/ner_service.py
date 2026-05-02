@@ -81,6 +81,19 @@ NON_EXPERIENCE_HEADERS = (
 )
 
 
+def _skill_pattern(skill: str) -> str:
+    """
+    Builds a regex pattern for a skill name that handles special characters.
+    \b fails when the skill starts or ends with a non-word char (C#, .NET, C++, CI/CD).
+    - Leading non-word char → use (?<!\w) instead of \b
+    - Trailing non-word char → use (?!\w) instead of \b
+    """
+    escaped = re.escape(skill)
+    prefix = r"(?<!\w)" if not skill[0].isalnum() and skill[0] != "_" else r"\b"
+    suffix = r"(?!\w)" if not skill[-1].isalnum() and skill[-1] != "_" else r"\b"
+    return prefix + escaped + suffix
+
+
 class NERService(NERServiceInterface):
     def extract_entities(self, text: str) -> dict:
         return {
@@ -109,9 +122,7 @@ class NERService(NERServiceInterface):
 
         found = []
         for skill in KNOWN_SKILLS:
-            # \b = word boundary. Evita matchear "Java" dentro de "JavaScript".
-            # re.escape para skills con caracteres especiales como "C++" o ".NET"
-            pattern = r"\b" + re.escape(skill) + r"\b"
+            pattern = _skill_pattern(skill)
             if re.search(pattern, usable_text, re.IGNORECASE):
                 found.append(skill)
         return found

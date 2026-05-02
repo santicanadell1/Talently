@@ -14,6 +14,7 @@ class ExtractedProfile:
     seniority_confidence: float | None = None
     area: str | None = None
     area_confidence: float | None = None
+    has_projects: bool = False
 
 
 @dataclass

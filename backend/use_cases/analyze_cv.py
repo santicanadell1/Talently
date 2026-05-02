@@ -1,3 +1,5 @@
+import re
+
 from domain.entities import AnalysisReport, ExtractedProfile, JobMatch
 from domain.interfaces import (
     ClassifierInterface,
@@ -54,6 +56,7 @@ class AnalyzeCVUseCase:
             seniority_confidence=seniority.get("confidence"),
             area=area.get("label"),
             area_confidence=area.get("confidence"),
+            has_projects=self._has_projects_section(raw_text),
         )
 
         # Paso 5: calcular job match (solo si hay job description)
@@ -65,6 +68,13 @@ class AnalyzeCVUseCase:
         # Paso 6: generar reporte con recomendaciones
         report = AnalysisReport(profile=profile, job_match=job_match, recommendations=[])
         return self.report_generator.generate(report)
+
+    @staticmethod
+    def _has_projects_section(text: str) -> bool:
+        return bool(re.search(
+            r"^(projects?|proyectos?|personal projects?|side projects?|portfolio)$",
+            text, re.IGNORECASE | re.MULTILINE,
+        ))
 
     @staticmethod
     def _build_classification_text(raw_text: str, entities: dict) -> str:

@@ -13,6 +13,7 @@ class CVAnalysisSchema(BaseModel):
     education: list[str]
     seniority: SenioritySchema
     area: SenioritySchema  # misma estructura: label + confidence
+    has_projects: bool
 
 
 class JobMatchSchema(BaseModel):

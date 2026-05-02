@@ -11,6 +11,7 @@ from use_cases.analyze_cv import AnalyzeCVUseCase
 from domain.entities import AnalysisReport
 
 MAX_PDF_SIZE_MB = 5
+MIN_CONFIDENCE = 0.4
 
 
 class AnalyzeController:
@@ -25,6 +26,14 @@ class AnalyzeController:
         pdf_bytes = await self._validate_and_read(file)
         report = self.use_case.execute(pdf_bytes=pdf_bytes, job_description=job_description)
         return self._to_response(report)
+
+    @staticmethod
+    def _resolve_area(label: str | None, confidence: float | None) -> str:
+        if not label or label == "Unknown":
+            return "No detectado"
+        if (confidence or 0.0) < MIN_CONFIDENCE:
+            return "No detectado"
+        return label
 
     async def _validate_and_read(self, file: UploadFile) -> bytes:
         if file.content_type != "application/pdf":
@@ -52,9 +61,10 @@ class AnalyzeController:
                     confidence=report.profile.seniority_confidence or 0.0,
                 ),
                 area=SenioritySchema(
-                    label=report.profile.area or "Unknown",
+                    label=self._resolve_area(report.profile.area, report.profile.area_confidence),
                     confidence=report.profile.area_confidence or 0.0,
                 ),
+                has_projects=report.profile.has_projects,
             ),
             job_match=JobMatchSchema(
                 available=report.job_match.available,
