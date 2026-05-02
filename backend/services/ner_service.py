@@ -50,9 +50,12 @@ KNOWN_SKILLS = [
     "Computer Vision", "Data Science", "ETL", "Big Data",
 ]
 
-# Regex para detectar años de experiencia en español e inglés ("3 años de experiencia")
+# Regex para detectar años de experiencia en español e inglés ("3 años de experiencia").
+# El negative lookbehind (?<!\w) y el lookahead (?!mo|er|do|ro|to|°|º|st|nd|rd|th)
+# evitan capturar ordinales como "7mo semestre", "1er puesto", "2nd place".
 YEARS_REGEX = re.compile(
-    r"(\d+)\s*(?:\+)?\s*(?:años?|years?|yr)\s*(?:de\s*experiencia|of\s*experience)?",
+    r"(\d+)\s*(?:\+)?\s*(?!mo\b|er\b|do\b|ro\b|to\b|°|º|st\b|nd\b|rd\b|th\b)"
+    r"(?:años?|years?|yr)\s*(?:de\s*experiencia|of\s*experience)?",
     re.IGNORECASE,
 )
 
@@ -186,39 +189,52 @@ class NERService(NERServiceInterface):
     def _extract_experience_years(self, text: str) -> int | None:
         """
         Estima los años de experiencia. Estrategia en cascada:
-          1. Parsear rangos de fechas en la sección de experiencia laboral.
-          2. Fallback a buscar menciones explícitas tipo "3 años de experiencia".
+          1. Parsear rangos de fechas, pero SOLO si logramos encontrar y recortar
+             la sección de experiencia laboral. Si el OCR mezcló columnas y el
+             header no está en línea propia, el fallback devuelve el texto completo
+             y el date parser puede capturar fechas de proyectos o educación.
+          2. Fallback a menciones explícitas tipo "3 años de experiencia".
           3. None si nada matcheó.
         """
-        experience_section = self._extract_experience_section(text)
-        years_from_dates = calculate_total_years(experience_section)
-        if years_from_dates is not None and years_from_dates > 0:
-            # El consumer espera int (entities["experience_years"]: int | None).
-            # Redondeamos hacia arriba a partir de medio año para no subestimar.
-            return int(round(years_from_dates))
+        experience_section, section_found = self._extract_experience_section(text)
+
+        if section_found and self._has_ongoing_employment(experience_section):
+            years_from_dates = calculate_total_years(experience_section)
+            if years_from_dates is not None and years_from_dates > 0:
+                return int(round(years_from_dates))
 
         matches = YEARS_REGEX.findall(text)
         years = [int(m) for m in matches if m.isdigit() and 0 < int(m) < 50]
         return max(years) if years else None
 
-    def _extract_experience_section(self, text: str) -> str:
+    @staticmethod
+    def _has_ongoing_employment(text: str) -> bool:
+        """True si el texto tiene al menos una señal de empleo en curso."""
+        return bool(re.search(
+            r"\b(current|present|now|today|actualidad|actual|presente|hoy)\b",
+            text, re.IGNORECASE,
+        ))
+
+    def _extract_experience_section(self, text: str) -> tuple[str, bool]:
         """
-        Recorta el texto a la sección de experiencia laboral. Si no encuentra
-        un header reconocido, devuelve el texto completo (mejor algo que nada).
+        Recorta el texto a la sección de experiencia laboral.
+        Devuelve (texto_seccion, encontrado). Si no encuentra un header
+        reconocido en línea propia (caso típico en CVs de dos columnas donde
+        el OCR mezcla texto), devuelve (texto_completo, False) para que el
+        caller sepa que no puede confiar en el recorte.
         """
         lines = text.split("\n")
         start_idx = self._find_header_line(lines, EXPERIENCE_HEADERS)
         if start_idx is None:
-            return text
+            return text, False
 
-        # Buscamos el próximo header de OTRA sección a partir de start_idx + 1.
         end_idx = self._find_header_line(
             lines, NON_EXPERIENCE_HEADERS, start_at=start_idx + 1
         )
         if end_idx is None:
-            return "\n".join(lines[start_idx:])
+            return "\n".join(lines[start_idx:]), True
 
-        return "\n".join(lines[start_idx:end_idx])
+        return "\n".join(lines[start_idx:end_idx]), True
 
     @staticmethod
     def _find_header_line(

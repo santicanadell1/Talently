@@ -1,3 +1,5 @@
+import re
+
 from domain.entities import AnalysisReport, Recommendation
 from domain.interfaces import ReportGeneratorInterface
 
@@ -201,8 +203,16 @@ class ReportGeneratorService(ReportGeneratorInterface):
     # ---------- Recomendaciones sin job description ----------
 
     def _general_recommendations(self, report: AnalysisReport) -> list[Recommendation]:
-        return [
-            Recommendation(
+        recs: list[Recommendation] = []
+        profile = report.profile
+        has_experience = profile.experience_years is not None and profile.experience_years > 0
+        has_projects = self._has_projects_section(profile.raw_text)
+
+        # Solo recomendamos métricas de impacto si el perfil tiene experiencia
+        # laboral real. Para perfiles sin experiencia en tech, esta recomendación
+        # no aplica y confunde al candidato.
+        if has_experience:
+            recs.append(Recommendation(
                 category="cv_structure",
                 priority="medium",
                 message=(
@@ -210,16 +220,31 @@ class ReportGeneratorService(ReportGeneratorInterface):
                     "En lugar de 'optimicé el sistema', escribí 'reduje el tiempo de respuesta un 40%'. "
                     "Los números llaman la atención de los reclutadores."
                 ),
-            ),
-            Recommendation(
+            ))
+
+        # Solo recomendamos agregar proyectos si no detectamos una sección de proyectos.
+        if not has_projects:
+            recs.append(Recommendation(
                 category="cv_structure",
                 priority="medium",
                 message=(
                     "Incluí una sección de proyectos personales o contribuciones open source. "
                     "Es una excelente forma de demostrar iniciativa y pasión por el desarrollo."
                 ),
-            ),
-        ]
+            ))
+
+        return recs
+
+    @staticmethod
+    def _has_projects_section(text: str) -> bool:
+        """Detecta si el CV tiene una sección de proyectos."""
+        if not text:
+            return False
+        pattern = re.compile(
+            r"^(projects?|proyectos?|personal projects?|side projects?|portfolio)$",
+            re.IGNORECASE | re.MULTILINE,
+        )
+        return bool(pattern.search(text))
 
     # ---------- Recomendaciones generales sobre el perfil ----------
 
