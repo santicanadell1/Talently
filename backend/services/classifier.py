@@ -4,6 +4,17 @@ from core.config import settings
 
 SENIORITY_LABELS = ["Junior", "Mid", "Senior", "Lead"]
 
+# Umbrales de seniority por años de experiencia. Tupla (min, max) inclusiva en
+# min y exclusiva en max. Se evalúan en orden: el primero que matchea gana.
+# Centralizado acá para que ajustar la política sea cambiar UNA línea.
+# Lead no entra en la regla determinística: ser Lead es por responsabilidades,
+# no por años. Si no hay años, el modelo zero-shot puede igual devolver Lead.
+SENIORITY_THRESHOLDS = [
+    ("Junior", 0, 2),
+    ("Mid",    2, 5),
+    ("Senior", 5, 999),
+]
+
 AREA_LABELS = [
     "Backend Development",
     "Frontend Development",
@@ -19,11 +30,26 @@ AREA_LABELS = [
 
 
 class ClassifierService(ClassifierInterface):
-    def classify_seniority(self, text: str) -> dict:
+    def classify_seniority(self, text: str, experience_years: int | None) -> dict:
+        """
+        Clasifica seniority. Si tenemos años, regla determinística (confidence 1.0).
+        Si no, caemos al modelo zero-shot que evalúa el texto crudo.
+        """
+        if experience_years is not None:
+            return self._seniority_by_years(experience_years)
         return self._classify(text, SENIORITY_LABELS)
 
     def classify_area(self, text: str) -> dict:
         return self._classify(text, AREA_LABELS)
+
+    @staticmethod
+    def _seniority_by_years(years: int) -> dict:
+        """Aplica la tabla de umbrales. Confidence 1.0 porque es determinístico."""
+        for label, lo, hi in SENIORITY_THRESHOLDS:
+            if lo <= years < hi:
+                return {"label": label, "confidence": 1.0}
+        # Fallback defensivo: no debería pasar con la tabla actual.
+        return {"label": "Senior", "confidence": 1.0}
 
     def _classify(self, text: str, labels: list[str]) -> dict:
         """

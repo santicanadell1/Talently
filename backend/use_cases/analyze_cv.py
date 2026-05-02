@@ -32,8 +32,11 @@ class AnalyzeCVUseCase:
         # Paso 2: extraer entidades con NER
         entities = self.ner_service.extract_entities(raw_text)
 
-        # Paso 3: clasificar seniority y área
-        seniority = self.classifier.classify_seniority(raw_text)
+        # Paso 3: clasificar seniority y área. El seniority recibe los años
+        # detectados por el NER: si están, se aplica una regla determinística;
+        # si no, el classifier cae al modelo zero-shot.
+        experience_years = entities.get("experience_years")
+        seniority = self.classifier.classify_seniority(raw_text, experience_years)
         area = self.classifier.classify_area(raw_text)
 
         # Paso 4: armar el perfil

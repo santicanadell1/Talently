@@ -19,8 +19,14 @@ class NERServiceInterface(ABC):
 
 class ClassifierInterface(ABC):
     @abstractmethod
-    def classify_seniority(self, text: str) -> dict:
-        """Retorna {'label': str, 'confidence': float}."""
+    def classify_seniority(self, text: str, experience_years: int | None) -> dict:
+        """
+        Retorna {'label': str, 'confidence': float}.
+
+        Si `experience_years` viene con un número, se aplica una regla
+        determinística por umbrales (confidence = 1.0). Si viene None,
+        la implementación cae a un fallback (ej. zero-shot).
+        """
         ...
 
     @abstractmethod
