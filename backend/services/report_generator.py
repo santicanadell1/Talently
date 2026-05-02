@@ -1,6 +1,8 @@
 from domain.entities import AnalysisReport, Recommendation
 from domain.interfaces import ReportGeneratorInterface
 
+MIN_CONFIDENCE = 0.4
+
 
 class ReportGeneratorService(ReportGeneratorInterface):
     def generate(self, report: AnalysisReport) -> AnalysisReport:
@@ -18,7 +20,134 @@ class ReportGeneratorService(ReportGeneratorInterface):
         recommendations.sort(key=lambda r: priority_order.get(r.priority, 3))
 
         report.recommendations = recommendations[:6]  # máximo 6
+        report.narrative = self._build_narrative(report)
         return report
+
+    # ---------- Narrativa ----------
+
+    def _build_narrative(self, report: AnalysisReport) -> str:
+        paragraphs: list[str] = []
+
+        opening = self._opening_paragraph(report)
+        if opening:
+            paragraphs.append(opening)
+
+        match_para = self._match_paragraph(report)
+        if match_para:
+            paragraphs.append(match_para)
+
+        closing = self._closing_paragraph(report)
+        if closing:
+            paragraphs.append(closing)
+
+        return "\n\n".join(paragraphs)
+
+    def _opening_paragraph(self, report: AnalysisReport) -> str:
+        profile = report.profile
+        area = self._confident_label(profile.area, profile.area_confidence)
+        seniority = self._confident_label(profile.seniority, profile.seniority_confidence)
+        skills = profile.skills
+
+        # Frase base
+        if area and seniority:
+            base = (
+                f"Viendo tu CV llegamos a que tenés un perfil {seniority.lower()} "
+                f"orientado a {area.lower()}"
+            )
+        elif area:
+            base = f"Viendo tu CV llegamos a que tu perfil está orientado a {area.lower()}"
+        elif seniority:
+            base = f"Viendo tu CV identificamos un perfil {seniority.lower()}"
+        else:
+            base = "Viendo tu CV armamos un panorama general de tu perfil"
+
+        # Skills destacadas (hasta 5)
+        if skills:
+            top = skills[:5]
+            if len(top) == 1:
+                skills_str = top[0]
+            else:
+                skills_str = ", ".join(top[:-1]) + f" y {top[-1]}"
+            base += f", con manejo de {skills_str}"
+
+        # Experiencia
+        years = profile.experience_years
+        if years:
+            base += f". Detectamos alrededor de {years} año{'s' if years != 1 else ''} de experiencia"
+
+        return base.rstrip(".") + "."
+
+    def _match_paragraph(self, report: AnalysisReport) -> str:
+        if not report.job_match.available or report.job_match.score is None:
+            return ""
+
+        score = report.job_match.score
+        matched = report.job_match.matched_skills
+        missing = report.job_match.missing_skills
+
+        if score >= 75:
+            tone = (
+                f"Tu match con esta vacante es del {score}%, un encaje muy bueno: "
+                "tu perfil se alinea con lo que buscan."
+            )
+        elif score >= 50:
+            tone = (
+                f"Tu match con esta vacante es del {score}%, una base decente "
+                "aunque con margen para destacarte mejor."
+            )
+        else:
+            tone = (
+                f"Tu match con esta vacante es del {score}%, un encaje bajo: "
+                "conviene reforzar varias áreas antes de aplicar."
+            )
+
+        if missing:
+            top_missing = ", ".join(missing[:3])
+            tone += f" Te faltan tecnologías clave como {top_missing}, que la vacante pide explícitamente."
+        elif matched:
+            tone += f" Ya tenés skills importantes que pide el puesto, como {', '.join(matched[:3])}."
+
+        return tone
+
+    def _closing_paragraph(self, report: AnalysisReport) -> str:
+        profile = report.profile
+        gaps: list[str] = []
+
+        if profile.experience_years is None:
+            gaps.append("no logramos identificar con claridad tus años de experiencia")
+
+        seniority_confident = self._confident_label(profile.seniority, profile.seniority_confidence)
+        if not seniority_confident:
+            gaps.append("tu nivel de seniority no queda del todo claro")
+
+        if len(profile.skills) < 5:
+            gaps.append("la cantidad de skills técnicas que aparecen es baja")
+
+        if not profile.education:
+            gaps.append("no encontramos una sección de educación")
+
+        if not gaps:
+            return (
+                "En general el CV comunica bien tu perfil. Abajo te dejamos algunos ajustes "
+                "puntuales que pueden darle todavía más impacto."
+            )
+
+        if len(gaps) == 1:
+            gaps_str = gaps[0]
+        else:
+            gaps_str = ", ".join(gaps[:-1]) + f", y {gaps[-1]}"
+
+        return (
+            f"Ahora bien, {gaps_str} — y eso puede jugarte en contra cuando un reclutador "
+            "escanea tu CV en segundos. A continuación te dejamos lo que conviene ajustar."
+        )
+
+    def _confident_label(self, label: str | None, confidence: float | None) -> str | None:
+        if not label or label == "Unknown":
+            return None
+        if confidence is None or confidence < MIN_CONFIDENCE:
+            return None
+        return label
 
     # ---------- Recomendaciones cuando hay job description ----------
 

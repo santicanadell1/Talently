@@ -26,8 +26,14 @@ class HFClient:
         url = f"{HF_API_BASE}/{model}"
 
         for attempt in range(MAX_RETRIES):
-            with httpx.Client(timeout=60.0) as client:
-                response = client.post(url, headers=self.headers, json=payload)
+            try:
+                with httpx.Client(timeout=20.0) as client:
+                    response = client.post(url, headers=self.headers, json=payload)
+            except httpx.TimeoutException:
+                # Si el modelo no respondió en 20s, cortamos y dejamos que el
+                # servicio caiga en su fallback (Unknown / 0.5) en vez de
+                # colgar la request del usuario.
+                raise RuntimeError(f"HF model {model} timeout") from None
 
             # Caso feliz: respuesta OK
             if response.status_code == 200:

@@ -31,6 +31,7 @@ export interface AnalyzeResponse {
   cv_analysis: CVAnalysis;
   job_match: JobMatch;
   recommendations: Recommendation[];
+  narrative: string;
 }
 
 export async function analyzeCV(

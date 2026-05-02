@@ -32,3 +32,4 @@ class AnalyzeResponseSchema(BaseModel):
     cv_analysis: CVAnalysisSchema
     job_match: JobMatchSchema
     recommendations: list[RecommendationSchema]
+    narrative: str

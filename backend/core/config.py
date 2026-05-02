@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # Modelos de HF Inference API (router.huggingface.co)
     ner_model: str = "Davlan/xlm-roberta-base-ner-hrl"
-    zero_shot_model: str = "vicgalle/xlm-roberta-large-xnli-anli"
+    zero_shot_model: str = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 

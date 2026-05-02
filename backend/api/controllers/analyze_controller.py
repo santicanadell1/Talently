@@ -70,4 +70,5 @@ class AnalyzeController:
                 )
                 for r in report.recommendations
             ],
+            narrative=report.narrative,
         )

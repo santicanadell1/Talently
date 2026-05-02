@@ -36,3 +36,4 @@ class AnalysisReport:
     profile: ExtractedProfile
     job_match: JobMatch
     recommendations: list[Recommendation]
+    narrative: str = ""
