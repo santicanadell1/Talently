@@ -12,6 +12,7 @@ export interface CVAnalysis {
   education: string[];
   seniority: SeniorityResult;
   area: SeniorityResult;
+  has_projects: boolean;
 }
 
 export interface JobMatch {

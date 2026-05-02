@@ -70,6 +70,36 @@ function SkillsBlock({
   );
 }
 
+function Strengths({ cv_analysis }: { cv_analysis: import("@/lib/api").CVAnalysis }) {
+  const checks = [
+    { label: "Incluye skills técnicas", ok: cv_analysis.extracted_skills.length > 0 },
+    { label: "Incluye años de experiencia", ok: cv_analysis.experience_years != null },
+    { label: "Incluye sección de educación", ok: cv_analysis.education.length > 0 },
+    { label: "Incluye proyectos", ok: cv_analysis.has_projects },
+    { label: "Área profesional identificada", ok: cv_analysis.area.label !== "No detectado" },
+    { label: "Nivel de seniority claro", ok: cv_analysis.seniority.confidence >= 0.5 },
+  ];
+
+  const passing = checks.filter((c) => c.ok);
+  if (passing.length === 0) return null;
+
+  return (
+    <section className="flex flex-col gap-4 pt-2 border-t border-white/5">
+      <p className="text-[#E8192C] text-xs tracking-[0.3em] uppercase font-mono">
+        Puntos fuertes
+      </p>
+      <ul className="flex flex-col gap-2">
+        {passing.map((c) => (
+          <li key={c.label} className="flex items-center gap-3">
+            <span className="text-emerald-400 text-base leading-none">✓</span>
+            <span className="text-[#D4D4D8] text-sm font-light">{c.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function ReportSection({ report }: ReportSectionProps) {
   const { cv_analysis, job_match, recommendations, narrative } = report;
   const paragraphs = narrative.split("\n\n").filter((p) => p.trim());
@@ -107,6 +137,9 @@ export function ReportSection({ report }: ReportSectionProps) {
           </p>
         ))}
       </section>
+
+      {/* Puntos fuertes */}
+      <Strengths cv_analysis={cv_analysis} />
 
       {/* Skills */}
       {(cv_analysis.extracted_skills.length > 0 || job_match.available) && (

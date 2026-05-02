@@ -101,7 +101,7 @@ export default function Home() {
             className="object-contain"
           />
           <span className="text-[#444] text-xs border border-white/8 rounded-full px-3 py-1 tracking-widest uppercase">
-            Beta
+            Para developers
           </span>
         </div>
       </nav>
@@ -110,24 +110,24 @@ export default function Home() {
 
         {/* Hero */}
         <section className="flex flex-col items-center text-center pt-28 pb-20 gap-10">
-          <p className="text-[#444] text-xs tracking-[0.4em] uppercase font-mono">
-            Análisis de CVs con IA.
+          <p className="animate-fade-up-1 text-[#444] text-xs tracking-[0.4em] uppercase font-mono">
+            Análisis de CVs para perfiles tecnológicos.
           </p>
 
-          <h1 className="font-sans leading-[1.08] tracking-[-0.01em] text-white"
+          <h1 className="animate-fade-up-2 font-sans leading-[1.08] tracking-[-0.01em] text-white"
             style={{ fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 300, fontFamily: "var(--font-inter)" }}
           >
-            Mejorá tu CV. Conseguí el trabajo.
+            Tu próximo rol tech empieza con un buen CV.
           </h1>
 
-          <p className="text-[#444] text-base max-w-sm leading-relaxed font-light">
+          <p className="animate-fade-up-3 text-[#444] text-base max-w-sm leading-relaxed font-light">
             Subí tu CV, pegá la descripción de la vacante y recibí
-            recomendaciones concretas para destacar.
+            recomendaciones concretas para destacar en el mercado tech.
           </p>
         </section>
 
         {/* Formulario */}
-        <section className="flex flex-col gap-6 pb-20">
+        <section className="animate-fade-up-4 flex flex-col gap-6 pb-20">
 
           {/* Divisor */}
           <div className="flex items-center gap-4 mb-2">
@@ -192,7 +192,15 @@ export default function Home() {
 
       <footer className="relative z-10 border-t border-white/5 py-8 px-6">
         <div className="max-w-4xl mx-auto text-center text-[#333] text-xs tracking-widest uppercase">
-          Talently · Análisis de CVs con IA
+          Diseñado y desarrollado por{" "}
+          <a
+            href="https://www.linkedin.com/in/santiago-canadell-a15012297/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#555] hover:text-[#E8192C] transition-colors"
+          >
+            Santiago Canadell
+          </a>
         </div>
       </footer>
 

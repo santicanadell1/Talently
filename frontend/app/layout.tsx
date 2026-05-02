@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Talently — Analizador de CVs con IA",
-  description: "Subí tu CV y descubrí exactamente qué mejorar para conseguir el trabajo que querés.",
+  title: "Talently — Análisis de CVs para perfiles tecnológicos",
+  description: "Subí tu CV tech y descubrí exactamente qué mejorar para conseguir el rol que querés.",
 };
 
 export default function RootLayout({
