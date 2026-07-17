@@ -2,11 +2,9 @@
 
 **Demo en vivo:** https://talently-pi.vercel.app/
 
-## About Me
+## Qué es
 
-Soy Santiago Canadell, estudiante de Ingeniería en Sistemas en ORT Uruguay. Construí Talently porque quería entender, de punta a punta, cómo se arma un producto de IA real: no solo llamar a un modelo y mostrar el resultado, sino diseñar el flujo completo — extracción de datos, clasificación, scoring y generación de recomendaciones — con una arquitectura que se pueda mantener y testear.
-
-Talently analiza un CV en PDF y, si el usuario pega la descripción de una vacante, calcula qué tan bien encaja el perfil y qué le falta. Es un proyecto personal, pensado como pieza de portfolio para mostrar cómo aplico Clean Architecture y consumo de modelos de Hugging Face en un caso de uso concreto.
+Talently es una aplicación que analiza currículums y ayuda a mejorarlos. Subís tu CV en PDF y, si querés, pegás la descripción de una vacante: la app te dice qué tan bien encaja tu perfil, qué te falta y te da recomendaciones concretas para mejorarlo.
 
 ## Qué hace
 
